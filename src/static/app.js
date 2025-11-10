@@ -1,7 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Constants
-  const REFRESH_DELAY_MS = 100; // Delay before refreshing activities list to ensure backend processing is complete
-
   const activitiesList = document.getElementById("activities-list");
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
@@ -116,9 +113,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.className = "success";
         signupForm.reset();
         // Refresh the activities list to show updated participants
-        setTimeout(() => {
-          fetchActivities();
-        }, REFRESH_DELAY_MS);
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -142,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.unregisterParticipant = async (activityName, email) => {
     // Show confirmation dialog
     // No escaping needed: confirm() only displays plain text and does not interpret HTML or execute scripts.
-    const confirmed = confirm(`Are you sure you want to unregister ${String(email)} from ${String(activityName)}?`);
+    const confirmed = confirm(`Are you sure you want to unregister ${email} from ${activityName}?`);
     
     if (!confirmed) {
       return; // User cancelled, don't proceed with unregistration
@@ -162,9 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         // Refresh the activities list to show updated participants
-        setTimeout(() => {
-          fetchActivities();
-        }, REFRESH_DELAY_MS);
+        fetchActivities();
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
