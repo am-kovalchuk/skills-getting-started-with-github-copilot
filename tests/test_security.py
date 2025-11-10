@@ -49,49 +49,61 @@ class TestXSSPrevention:
         activities_data = response.json()
         assert quote_email in activities_data["Chess Club"]["participants"]
 
-    def test_backend_does_not_validate_html_content(self, client):
-        """Test that the backend accepts but doesn't validate HTML content."""
-        # Backend should accept any string content - validation is frontend responsibility
+    def test_backend_sanitizes_html_content(self, client):
+        """Test that the backend sanitizes or rejects HTML content in email addresses."""
         malicious_email = "<script>document.location='http://evil.com'</script>@test.com"
         
         response = client.post(f"/activities/Chess Club/signup?email={malicious_email}")
-        assert response.status_code == 200
+        # Backend should reject or sanitize malicious input
+        assert response.status_code == 400 or response.status_code == 200
         
-        # Verify the malicious email was stored as-is
-        response = client.get("/activities")
-        activities_data = response.json()
-        assert malicious_email in activities_data["Chess Club"]["participants"]
+        # If accepted, verify the malicious email was sanitized
+        if response.status_code == 200:
+            response = client.get("/activities")
+            activities_data = response.json()
+            stored_emails = activities_data["Chess Club"]["participants"]
+            # Ensure no raw script tags are present
+            for email in stored_emails:
+                assert "<script>" not in email and "</script>" not in email
 
-    def test_html_tags_in_email(self, client):
-        """Test that HTML tags in emails are accepted by backend."""
+    def test_html_tags_in_email_are_sanitized(self, client):
+        """Test that HTML tags in emails are sanitized or rejected by backend."""
         html_email = "<img src=x onerror=alert('xss')>@evil.com"
         
         response = client.post(f"/activities/Programming Class/signup?email={html_email}")
-        assert response.status_code == 200
+        assert response.status_code == 400 or response.status_code == 200
         
-        response = client.get("/activities")
-        activities_data = response.json()
-        assert html_email in activities_data["Programming Class"]["participants"]
+        if response.status_code == 200:
+            response = client.get("/activities")
+            activities_data = response.json()
+            stored_emails = activities_data["Programming Class"]["participants"]
+            for email in stored_emails:
+                assert "<img" not in email and "onerror=" not in email
 
-    def test_script_tags_in_email(self, client):
-        """Test that script tags in emails are accepted but should be escaped by frontend."""
+    def test_script_tags_in_email_are_sanitized(self, client):
+        """Test that script tags in emails are sanitized or rejected by backend."""
         script_email = "<script>alert('xss')</script>@evil.com"
         
         response = client.post(f"/activities/Gym Class/signup?email={script_email}")
-        assert response.status_code == 200
+        assert response.status_code == 400 or response.status_code == 200
         
-        # Verify it was stored
-        response = client.get("/activities")
-        activities_data = response.json()
-        assert script_email in activities_data["Gym Class"]["participants"]
+        if response.status_code == 200:
+            response = client.get("/activities")
+            activities_data = response.json()
+            stored_emails = activities_data["Gym Class"]["participants"]
+            for email in stored_emails:
+                assert "<script>" not in email and "</script>" not in email
 
-    def test_mixed_quotes_and_html(self, client):
-        """Test mixed quotes and HTML content."""
+    def test_mixed_quotes_and_html_are_sanitized(self, client):
+        """Test mixed quotes and HTML content are sanitized or rejected by backend."""
         complex_email = """test'"><script>alert("xss")</script>@evil.com"""
         
         response = client.post(f"/activities/Chess Club/signup?email={complex_email}")
-        assert response.status_code == 200
+        assert response.status_code == 400 or response.status_code == 200
         
-        response = client.get("/activities")
-        activities_data = response.json()
-        assert complex_email in activities_data["Chess Club"]["participants"]
+        if response.status_code == 200:
+            response = client.get("/activities")
+            activities_data = response.json()
+            stored_emails = activities_data["Chess Club"]["participants"]
+            for email in stored_emails:
+                assert "<script>" not in email and "</script>" not in email
