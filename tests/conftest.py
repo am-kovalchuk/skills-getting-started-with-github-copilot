@@ -2,7 +2,6 @@
 Test configuration and fixtures for the FastAPI application.
 """
 import pytest
-import copy
 from fastapi.testclient import TestClient
 from src.app import app, activities
 
@@ -16,10 +15,7 @@ def client():
 @pytest.fixture(autouse=True)
 def reset_activities():
     """Reset activities data before each test to ensure test isolation."""
-    # Store original activities with deep copy to preserve nested structures
-    original_activities = copy.deepcopy(activities)
-    
-    # Reset to initial state
+    # Reset to initial state before each test
     activities.clear()
     activities.update({
         "Chess Club": {
@@ -41,12 +37,6 @@ def reset_activities():
             "participants": ["john@mergington.edu", "olivia@mergington.edu"]
         }
     })
-    
-    yield
-    
-    # Restore original activities after test with deep copy
-    activities.clear()
-    activities.update(original_activities)
 
 
 @pytest.fixture
