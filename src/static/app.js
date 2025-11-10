@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Constants
+  const REFRESH_DELAY_MS = 100; // Delay before refreshing activities list to ensure backend processing is complete
+
   const activitiesList = document.getElementById("activities-list");
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
@@ -115,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Refresh the activities list to show updated participants
         setTimeout(() => {
           fetchActivities();
-        }, 100); // Small delay to ensure backend has processed the request
+        }, REFRESH_DELAY_MS);
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
@@ -160,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Refresh the activities list to show updated participants
         setTimeout(() => {
           fetchActivities();
-        }, 100); // Small delay to ensure backend has processed the request
+        }, REFRESH_DELAY_MS);
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
