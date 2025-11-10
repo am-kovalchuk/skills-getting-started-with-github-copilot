@@ -136,8 +136,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to unregister a participant
   window.unregisterParticipant = async (activityName, email) => {
     // Show confirmation dialog
-    // No escaping needed: confirm() only displays plain text and does not interpret HTML or execute scripts.
-    const confirmed = confirm(`Are you sure you want to unregister ${email} from ${activityName}?`);
+    // Sanitize user input before displaying in confirm dialog.
+    const safeEmail = escapeHtml(email);
+    const safeActivityName = escapeHtml(activityName);
+    const confirmed = confirm(`Are you sure you want to unregister ${safeEmail} from ${safeActivityName}?`);
     
     if (!confirmed) {
       return; // User cancelled, don't proceed with unregistration
